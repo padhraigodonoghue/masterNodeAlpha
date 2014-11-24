@@ -80,6 +80,7 @@ void concentrateOnMusic()
     }
 }
 
+// compensates for rolling index of the superFrameArray (which has an extra act for ... no good reason, now that I think about it)
 int lookUp(int previousFrameNumberIn, int noteNumberIn)
 {
   int moduloDividend = previousFrameNumberIn + (framesPerAct + 1) + noteNumberIn;
