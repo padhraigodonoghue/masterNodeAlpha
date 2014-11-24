@@ -9,25 +9,17 @@ int maxFrameTraffic          = 200;    // rough estimate; will be dynamically ad
 long actDuration;
 int framesPerComposition;
 
-int act0[framesPerAct];
-int act1[framesPerAct];
-int act2[framesPerAct];
-int act3[framesPerAct];
-
-// 2-dimensional array of counts
-int superFrameArray[actsPerComposition + 1][framesPerAct];
+// 4-act long array of counts
+int superFrameArray[(framesPerAct * (actsPerComposition + 1))];
 
 void setup()
 {
   actDuration = frameDuration * framesPerAct;
   framesPerComposition = framesPerAct * actsPerComposition;
 
-  for(int i = 0; i < actsPerComposition; i++)
+  for(int i = 0; i < (framesPerAct * (actsPerComposition + 1)); i++)
   {
-    for (int j = 0; j < framesPerAct; j++)
-    {
-      superFrameArray[i][j]= maxFrameTraffic;
-    }
+    superFrameArray[i] = maxFrameTraffic;
   }
 }
 
@@ -87,10 +79,9 @@ void incrementer()
   // look only at window of time equivalent to full composition and 1/3, i.e. 4 "acts"
   long superCompositionWrapTime = (millis() % (actDuration * (actsPerComposition + 1)));
   
-  int whichAct = (superCompositionWrapTime / actDuration;
   int whichBin = (superCompositionWrapTime / frameDuration);
   
-  superFrameArray[whichAct][whichAct]++;
+  superFrameArray[whichBin]++;
 }
 
 void playComposition()
@@ -98,10 +89,22 @@ void playComposition()
   // calculate delay
   // delay
   
-  long CompositionWrapTime = (millis() % (actDuration * (actsPerComposition)));
+  long compositionWrapTime = (millis() % (actDuration * (actsPerComposition)));
+  
+  int lastFrame = whatLastFrame();
   
   // play note, i.e. send rule
-  playNote(
+  playNote(rule);
+}
 
+void whatLastFrame()
+{
+  
+}
+
+void playNote(int ruleNumber)
+{
+//  Serial.println(ruleNumber);
+  Serial.write(ruleNumber);
 }
 
