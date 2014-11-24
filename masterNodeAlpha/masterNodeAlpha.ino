@@ -7,60 +7,101 @@ const int playbackBuffer     = 100;    // in milliseconds
 int maxFrameTraffic          = 200;    // rough estimate; will be dynamically adjusted as max is exceeded
 
 long actDuration;
+long compositionDuration;
+long superCompositionDuration;
 int framesPerComposition;
 
 // 4-act long array of counts
-int superFrameArray[(framesPerAct * (actsPerComposition + 1))];
+int superFrameArray[framesPerAct * (actsPerComposition + 1)];
+
+boolean debugMode = true;
 
 void setup()
 {
   actDuration = frameDuration * framesPerAct;
+  compositionDuration = actDuration * actsPerComposition;
+  superCompositionDuration = actDuration * (actsPerComposition + 1);
   framesPerComposition = framesPerAct * actsPerComposition;
-
+  
+  // initialise superFrameArray (i.e. the traffic count bank) with -1 to indicate lack of sensor data
   for(int i = 0; i < (framesPerAct * (actsPerComposition + 1)); i++)
   {
-    superFrameArray[i] = maxFrameTraffic;
+    superFrameArray[i] = -1;
   }
+  
+  // initialise Serial Port at baud rate of 9600 bps
+  Serial.begin(9600);
 }
 
 void loop()
 {
-  scheduler();
+  concentrateOnMusic();
+  serviceSerial();
 }
 
-void scheduler()
+// get into the groove, etc.
+void concentrateOnMusic()
 {
-  if (priorityServiceSerial() == true)
+  long lookAheadMillis = millis() + playbackBuffer;
+  
+  // is the current time within the playback zone?
+  if ((lookAheadMillis % actDuration) < compositionDuration)
   {
-    serviceSerial();
-  }
-  else
-  {
-    playComposition();
-  }
-}
-
-// is it time to play anything or can serial port buffer be serviced?
-boolean priorityServiceSerial()
-{
-  long actWrapTime = millis() % actDuration;
-
-  // what rule number is coming up next
-  int ruleVicinity = (actWrapTime / ruleDuration);
-
-  // if we are in range of playable rules
-  if (ruleVicinity < framesPerComposition)
-  {
-    // check if we are within the playback buffer range of playing a note
-    if ((actWrapTime % ruleDuration) > (ruleDuration - playbackBuffer))
+    // is the current time within the leadtime of the next note?
+    // (i.e. is it between time of next note minus buffer to time of next note?)
+    if ((lookAheadMillis % ruleDuration) < playbackBuffer)
     {
-      return false;
+      // determine which note of the n-note composition is imminent
+      // n = (framesPerAct * actsPerComposition), i.e. 27-note
+      int noteNumber = (lookAheadMillis % actDuration) / ruleDuration;
+      
+      // determine the previousFrameNumber
+      // consider only modulus of superCompositionDuration and divide by frameDuration
+      // (should only ever be equal to [(n * 9) - 1], where n ∈ N < (actsPerComposition + 1 ... because of first if condition)
+      int previousFrameNumber = (lookAheadMillis % superCompositionDuration) / frameDuration;
+      
+      // lookup superFrameArray (i.e. the traffic count bank) for current index corresponding to noteNumber
+      // (index shifts dynamically, hence requires lookup with reference to current time and previousFrameNumber)
+      int superArrayAddress = lookUp(previousFrameNumber, noteNumber);
+      
+      // derive ruleNumber by comparing to a reference maximum; then determine necessary wait time before rule should be sent
+      int ruleNumber = countConversion(superArrayAddress);
+      int waitTime   = (millis() + playbackBuffer) % ruleDuration;
+      
+      // some debugging checks
+      if (debugMode == true)
+      {
+        print("lookAheadMillis: ");
+        println(lookAheadMillis);
+      }
+      
+      // call the function that executes a delay and send rule number over Serial Port
+      playNote(waitTime, ruleNumber);
     }
-  }
-  else
-  {
-    return true;
-  }
+}
+
+int lookUp(int previousFrameNumberIn, int noteNumberIn)
+{
+  int moduloDividend = previousFrameNumberIn + (framesPerAct + 1) + noteNumberIn;
+  int moduloDivisor  = framesPerAct * (actsPerComposition + 1);
+  
+  int indexOut =  moduloDividend % moduloDivisor;
+  
+  return indexOut;
+}
+
+int countConversion(int index)
+{
+  int ruleOut = 
+  
+  return ruleOut;
+}
+
+void playNote(int waitTimeIn, int ruleNumberIn)
+{
+  delay(waitTimeIn);
+//  Serial.println(ruleNumber);
+  Serial.write(ruleNumberIn);
 }
 
 void serviceSerial()
@@ -82,29 +123,5 @@ void incrementer()
   int whichBin = (superCompositionWrapTime / frameDuration);
   
   superFrameArray[whichBin]++;
-}
-
-void playComposition()
-{
-  // calculate delay
-  // delay
-  
-  long compositionWrapTime = (millis() % (actDuration * (actsPerComposition)));
-  
-  int lastFrame = whatLastFrame();
-  
-  // play note, i.e. send rule
-  playNote(rule);
-}
-
-void whatLastFrame()
-{
-  
-}
-
-void playNote(int ruleNumber)
-{
-//  Serial.println(ruleNumber);
-  Serial.write(ruleNumber);
 }
 
