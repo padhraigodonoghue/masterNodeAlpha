@@ -85,7 +85,9 @@ void playNote(int waitTimeIn, int ruleNumberIn)
   // some debugging checks
   if (debugMode == true)
   {
-    Serial.print("SENDING RULE (ruleNumberIn): ");
+    Serial.print("waitTimeIn: ");
+    Serial.print(waitTimeIn);
+    Serial.print(" ### SENDING RULE (ruleNumberIn): ");
     Serial.println(ruleNumberIn);
     Serial.println("");
   }

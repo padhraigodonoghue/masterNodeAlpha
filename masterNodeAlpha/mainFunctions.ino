@@ -44,7 +44,7 @@ void concentrateOnMusic()
 
       // derive ruleNumber by comparing to a reference maximum; then determine necessary wait time before rule should be sent
       int ruleNumber = countConversion(superArrayAddress);
-      int waitTime   = (millis() + playbackBuffer) % ruleDuration;
+      int waitTime   = (millis() + (playbackBuffer * 2)) % ruleDuration;
 
 
       // call the function that executes a delay before sending rule number over Serial Port
@@ -96,7 +96,7 @@ void serviceSerial()
 
     if (cobwebs == true)
     {
-      superFrameArray[(currentBin + ((sizeof(superFrameArray) / sizeof(int)) - 1)) % (sizeof(superFrameArray) / sizeof(int))] = 0;
+      superFrameArray[(currentBin + (sizeof(superFrameArray) / sizeof(int)) - 1) % (sizeof(superFrameArray) / sizeof(int))] = 0;
     }
     else
     {
