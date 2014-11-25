@@ -1,0 +1,4 @@
+void blink()
+{
+  debugOutputPinState = !debugOutputPinState;
+}
