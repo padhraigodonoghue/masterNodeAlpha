@@ -17,17 +17,10 @@ void concentrateOnMusic()
       // determine the previousFrameNumber
       // consider only modulus of superCompositionDuration and divide by frameDuration
       // (should only ever be equal to [(n * 9) - 1], where n ∈ N < (actsPerComposition + 1 ... because of first if condition)
-      int currentFrameNumber  = (lookAheadMillis % superCompositionDuration) / frameDuration;
+      int currentFrameNumber  = (lookAheadMillis % superRealtimeDataDuration) / frameDuration;
       int previousFrameNumber = (currentFrameNumber + ((framesPerComposition + framesPerAct) - 1)) % (framesPerAct * (actsPerComposition + 1));
-
-      // lookup superFrameArray (i.e. the traffic count bank) for current index corresponding to noteNumber
-      // (index shifts dynamically, hence requires lookup with reference to current time and previousFrameNumber)
-      int superArrayAddress = lookUp(previousFrameNumber, noteNumber);
-
-      // derive ruleNumber by comparing to a reference maximum; then determine necessary wait time before rule should be sent
-      int ruleNumber = countConversion(superArrayAddress);
-      int waitTime   = (millis() + playbackBuffer) % ruleDuration;
-
+      
+      
       // some debugging checks
       if (debugMode == true)
       {
@@ -36,10 +29,24 @@ void concentrateOnMusic()
         Serial.print(" ### noteNumber: ");
         Serial.print(noteNumber);
         Serial.print(" ### previousFrameNumber: ");
-        Serial.print(previousFrameNumber);
-        Serial.print(" ### superArrayAddress: ");
+        Serial.println(previousFrameNumber);
+      }
+
+      // lookup superFrameArray (i.e. the traffic count bank) for current index corresponding to noteNumber
+      // (index shifts dynamically, hence requires lookup with reference to current time and previousFrameNumber)
+      int superArrayAddress = lookUp(previousFrameNumber, noteNumber);
+      
+      // some debugging checks
+      if (debugMode == true)
+      {
+        Serial.print("superArrayAddress: ");
         Serial.println(superArrayAddress);
       }
+
+      // derive ruleNumber by comparing to a reference maximum; then determine necessary wait time before rule should be sent
+      int ruleNumber = countConversion(superArrayAddress);
+      int waitTime   = (millis() + playbackBuffer) % ruleDuration;
+
 
       // call the function that executes a delay before sending rule number over Serial Port
       playNote(waitTime, ruleNumber);
@@ -100,25 +107,27 @@ int countConversion(int index)
     {
       Serial.print("floatyBinCount: ");
       Serial.print(floatyBinCount);
-      Serial.print("... floatyMaxFrameTraffic: ");
+      Serial.print(" ### floatyMaxFrameTraffic: ");
       Serial.print(floatyMaxFrameTraffic);
-      Serial.print("... ratio: ");
+      Serial.print(" ### ratio: ");
       Serial.print(ratio);
-      Serial.print("... scaled: ");
-      Serial.print(scaled);
+      Serial.print(" ### scaled: ");
+      Serial.println(scaled);
     }
   }
   else
   {
     ruleOut = 255;
   }
-
+  
+  /**
   // some debugging checks
   if (debugMode == true)
   {
     Serial.print("ruleOut: ");
     Serial.println(ruleOut);
   }
+  **/
 
   return ruleOut;
 }
@@ -146,13 +155,16 @@ void serviceSerial()
   // some debugging checks
   if (debugMode == true)
   {
-//    Serial.println("checking Serial Port buffer...");
+    //    Serial.println("checking Serial Port buffer...");
   }
 
   while(Serial.available())
   {
-    // increment count on whatever frame for every byte in the serial port buffer
-    incrementTrafficCount();
+    if(Serial.read() == 49)
+    {
+      // increment count on whatever frame for every byte in the serial port buffer
+      incrementTrafficCount();
+    }
   }
 }
 
@@ -170,9 +182,9 @@ void incrementTrafficCount()
   if (debugMode == true)
   {
     Serial.print("lastAccessedFrame: ");
-    Serial.println(lastAccessedFrame);
-    Serial.print("whichBin: ");
-    Serial.println(whichBin);
+    Serial.print(lastAccessedFrame);
+    Serial.print(" ### whichBin: ");
+    Serial.print(whichBin);
   }
 
   if (whichBin != lastAccessedFrame)
@@ -189,13 +201,10 @@ void incrementTrafficCount()
   // some debugging checks
   if (debugMode == true)
   {
-    Serial.print("superFrameArray[");
+    Serial.print(" ### superFrameArray[");
     Serial.print(whichBin);
     Serial.print("]: ");
     Serial.println(superFrameArray[whichBin]);
+    Serial.println("");
   }
 }
-
-
-
-
