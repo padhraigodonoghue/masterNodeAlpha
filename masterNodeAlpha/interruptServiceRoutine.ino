@@ -1,4 +1,0 @@
-void blink()
-{
-  debugOutputPinState = !debugOutputPinState;
-}

@@ -1,48 +1,53 @@
-const long frameDuration         = 420000; // in milliseconds, i.e. 7 minutes
-const int framesPerAct           = 9;     // number of "frames" in each "act" of composition ("act" is 1/3 of composition)
-const int actsPerComposition     = 3;     // number of "acts" in the composition
-const int ruleDuration           = 5000;  // in milliseconds
-const int playbackBuffer         = 100;   // in milliseconds; the lead time before a note is due to be played which, when entered, Arduino focuses only on preparing to play that note (i.e. ignores Serial Port buffer)
+const long frameDuration         = 10000; // in milliseconds, i.e. 7 minutes; duration of real-time "frame"
+const int framesPerAct           = 9;      // number of "frames" in each "act" of composition ("act" is 1/3 of composition)
+const int actsPerComposition     = 3;      // number of "acts" in the composition
+const int ruleDuration           = 1000;   // in milliseconds
+const int playbackBuffer         = 100;    // in milliseconds; the lead time before a note is due to be played which, when entered, Arduino focuses only on preparing to play that note (i.e. ignores Serial Port buffer)
 const int numberOfRules          = 50;
 
-int maxFrameTraffic              = 49;    // rough estimate; will be dynamically adjusted when current max is exceeded
+int maxFrameTraffic              = 100;    // rough estimate; will be dynamically adjusted when current max is exceeded
 
-int lastAccessedFrame;                    // used in determination of "frame" change when writing to "frame" count
-int lastFrameCheck               = 0;                      // used in determination of "frame" change when zeroing "frame" count
+int lastAccessedFrame;      // used in determination of "frame" change
 
-long actRealtimeDataDuration;             // in milliseconds; total duration of "act"
-long compositionDuration;                 // in milliseconds; total duration of "composition"
-long superRealtimeDataDuration;           // in milliseconds; total duration of composition plus extra act's worth of realtime data
+long actRealtimeDataDuration;              // in milliseconds; total duration of real-time "act"
+long compositionDuration;                  // in milliseconds; total duration of "composition"
+long masterWrapTime;                       // in milliseconds; total duration of "composition" plus extra "frame's" worth of real-time data
 int framesPerComposition;
+int superArrayLength;                      // for storing length of array without having to calculate it each time
 
-boolean cobwebs                  = true; // for ensuring that zero activity frames are updated
+// array of counts, 3-acts-and-1-frame in length
+int superFrameArray[(framesPerAct * actsPerComposition) + 1];
 
-// 4-act long array of counts
-int superFrameArray[framesPerAct * (actsPerComposition + 1)] = {1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 16, 17, 17, 18, 18};
-
-boolean debugMode                = false;
-boolean silentDebugMode          = false;  // for debugging without Serial Port
-volatile int debugOutputPinState = LOW;
-const int debugOutputPinNumber   = 13;
+const boolean debugMode          = true;  // toggle serial port debug messages
 
 void setup()
 {
-  compositionDuration       = (long) framesPerAct * actsPerComposition * ruleDuration;
-  actRealtimeDataDuration   = frameDuration * (long) framesPerAct;
-  superRealtimeDataDuration = actRealtimeDataDuration * (actsPerComposition + 1);
-  framesPerComposition      = framesPerAct * actsPerComposition;
-  lastAccessedFrame         = (framesPerAct * (actsPerComposition + 1)) - 1;
+  compositionDuration            = (long) (framesPerAct * actsPerComposition * ruleDuration);
+  actRealtimeDataDuration        = frameDuration * (long) framesPerAct;
+  masterWrapTime                 = actRealtimeDataDuration * (long) (actsPerComposition + 1);
+  framesPerComposition           = framesPerAct * actsPerComposition;
+  superArrayLength               = (framesPerAct * actsPerComposition) + 1;
+  lastAccessedFrame              = superArrayLength - 1;
 
-/*
   // initialise superFrameArray (i.e. the traffic count bank) with -1 to indicate lack of sensor data
-  for(int i = 0; i < (framesPerAct * (actsPerComposition + 1)); i++)
+  for(int i = 0; i < superArrayLength; i++)
   {
-    superFrameArray[i] = 49;
+    superFrameArray[i] = 50;
   }
-*/
 
-  // initialise Serial Port at baud rate of 9600 bps
-  Serial.begin(9600);
+  /*
+  initialise Serial Port at baud rate of 9600 bps
+   (unless debug mode is on, in which case a higher baud rate is necessary...
+   to prevent Serial.print function from becoming a spanner in the works)
+   */
+  if (debugMode == true)
+  {
+    Serial.begin(57600);
+  }
+  else
+  {
+    Serial.begin(9600);
+  }
 
   // some debugging checks
   if (debugMode == true)
@@ -51,8 +56,8 @@ void setup()
     Serial.println(compositionDuration);
     Serial.print("actRealtimeDataDuration: ");
     Serial.println(actRealtimeDataDuration);
-    Serial.print("superCompositionDuration: ");
-    Serial.println(superRealtimeDataDuration);
+    Serial.print("masterWrapTime: ");
+    Serial.println(masterWrapTime);
     Serial.print("framesPerComposition: ");
     Serial.println(framesPerComposition);
     Serial.print("length of superFrameArray: ");
@@ -64,30 +69,14 @@ void setup()
     Serial.println(" ms");
     Serial.println("");
   }
-
-  pinMode(debugOutputPinNumber, OUTPUT);
-
-  if (silentDebugMode == true)
-  {
-    // set digital pin 3 to listen to a slave for testing without other electronics
-    // source: http://arduino.cc/en/Reference/attachInterrupt
-    attachInterrupt(1, blink, CHANGE);
-  }
 }
 
 void loop()
 {
   concentrateOnMusic();
-  serviceSerial();
-
-  if (silentDebugMode == true)
-  {
-    digitalWrite(debugOutputPinNumber, debugOutputPinState);
-  }
-  else
-  {
-    digitalWrite(debugOutputPinNumber, LOW);
-  }
-
+  pollSensor();
 }
+
+
+
 
