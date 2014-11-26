@@ -1,7 +1,8 @@
 // get into the groove, etc.
 void concentrateOnMusic()
 {
-  long lookAheadMillis = millis() + playbackBuffer;
+  // millis() value must be cast to signed long in order to do maths
+  unsigned long lookAheadMillis = millis() + playbackBuffer;
 
   // is the current time within the playback zone?
   if ((lookAheadMillis % actRealtimeDataDuration) < compositionDuration)
@@ -34,13 +35,14 @@ void concentrateOnMusic()
       // some debugging checks
       if (debugMode == true)
       {
+        unsigned long checkTime = millis();
         Serial.print("new millis(): ");
-        Serial.println(millis());
+        Serial.println(checkTime);
       }
 
       // determine necessary wait time before rule should be sent
       // add buffer time to current system time, modulo compare with ruleDuration, subtract result from buffer time
-      int waitTime   = playbackBuffer - ((millis() +  playbackBuffer) % ruleDuration);
+      int waitTime   = playbackBuffer - ((millis() + playbackBuffer) % ruleDuration);
 
       // call the function that executes a delay before sending rule number over Serial Port
       playNote(waitTime, ruleNumber);

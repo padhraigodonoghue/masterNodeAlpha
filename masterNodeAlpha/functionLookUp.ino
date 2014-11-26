@@ -20,7 +20,9 @@ int lookUp(long timeIn)
     Serial.print(" ### firstFrameOfCurrentAct: ");
     Serial.print(firstFrameOfCurrentAct);
     Serial.print(" ### lastFrameOfPreviousActNumber: ");
-    Serial.println(lastFrameOfPreviousActNumber);
+    Serial.print(lastFrameOfPreviousActNumber);
+    Serial.print(" ### previous frame: ");
+    Serial.println((frameTracker() + superArrayLength - 1) % superArrayLength);
   }
 
   int moduloDividend = lastFrameOfPreviousActNumber + 2 + noteNumber;

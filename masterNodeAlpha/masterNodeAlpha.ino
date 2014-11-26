@@ -1,7 +1,7 @@
-const long frameDuration         = 10000; // in milliseconds, i.e. 7 minutes; duration of real-time "frame"
+const long frameDuration         = 20000; // in milliseconds, i.e. 7 minutes; duration of real-time "frame"
 const int framesPerAct           = 9;      // number of "frames" in each "act" of composition ("act" is 1/3 of composition)
 const int actsPerComposition     = 3;      // number of "acts" in the composition
-const int ruleDuration           = 1000;   // in milliseconds
+const int ruleDuration           = 5000;   // in milliseconds
 const int playbackBuffer         = 100;    // in milliseconds; the lead time before a note is due to be played which, when entered, Arduino focuses only on preparing to play that note (i.e. ignores Serial Port buffer)
 const int numberOfRules          = 50;
 
@@ -18,19 +18,48 @@ int superArrayLength;                      // for storing length of array withou
 // array of counts, 3-acts-and-1-frame in length
 int superFrameArray[(framesPerAct * actsPerComposition) + 1];
 
-const boolean debugMode          = true;  // toggle serial port debug messages
+const boolean debugMode          = false;  // toggle serial port debug messages
+const boolean sensorMode         = false; // toggle sensor functionality
+
+/** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
+/** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ sensor code variables @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
+/** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
+
+const int sensorPin              = A0;    // main sensor pin input
+const int ledPin                 = 13;    // assign output pin for visual feedback
+
+boolean ledState = false;
+unsigned long previousBlinkTime  = 0;
+
+int sensorValue;                          // store last sensor reading
+
+boolean sensorStateChangeFlag    = false; // to allow us to check previous state and run certain state-dependent functions
+boolean calibrateMode            = false;
+
+float maxVal;                             // to hold max value from calibration
+float minVal                     = 300;   // to hold min value from calibration
+float mnVM                       = 1.2;   // MinValMultiple to create threshold that correctly detects when the beam is intact
+float mxVM                       = 0.25;  // MaxValMultiple to create threshold that correctly detects when the beam is broken
+
+int indexForAverager             = 0;     // tracker for index of recent sensor values array
+const int numOfReadsForAverager  = 10;    // length of array (i.e. sample size of averaging analysis)
+int arrayOfVals[numOfReadsForAverager];   // array of sensor reads to be averaged
+
+/** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
+/** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ program start @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
+/** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
 
 void setup()
 {
   compositionDuration            = (long) (framesPerAct * actsPerComposition * ruleDuration);
   actRealtimeDataDuration        = frameDuration * (long) framesPerAct;
-  masterWrapTime                 = actRealtimeDataDuration * (long) (actsPerComposition + 1);
   framesPerComposition           = framesPerAct * actsPerComposition;
   superArrayLength               = (framesPerAct * actsPerComposition) + 1;
-  lastAccessedFrame              = superArrayLength - 1;
+  masterWrapTime                 = (long) superArrayLength * (long) frameDuration;
+  lastAccessedFrame              = superArrayLength - 1; // initialise at end of array; monitoring/playing starts at 0
 
   // initialise superFrameArray (i.e. the traffic count bank) with -1 to indicate lack of sensor data
-  for(int i = 0; i < superArrayLength; i++)
+  for (int i = 0; i < superArrayLength; i++)
   {
     superFrameArray[i] = 50;
   }
@@ -47,6 +76,14 @@ void setup()
   else
   {
     Serial.begin(9600);
+  }
+  
+  // for sensor feedback
+  pinMode(ledPin, OUTPUT);
+  
+  if (calibrateMode == true)
+  {
+    sensorCalibration();
   }
 
   // some debugging checks
@@ -74,7 +111,14 @@ void setup()
 void loop()
 {
   concentrateOnMusic();
-  pollSensor();
+  if (sensorMode == true)
+  {
+    pollSensor();
+  }
+  else
+  {
+    serviceSerial();
+  }
 }
 
 
