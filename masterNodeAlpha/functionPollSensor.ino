@@ -28,13 +28,13 @@ void pollSensor()
 
 void beamBroken()
 {
-//  digitalWrite(ledPin, HIGH);
+  digitalWrite(ledPin, HIGH);
   incrementTrafficCount();
   sensorStateChangeFlag = true;
 }
 
 void beamBack()
 {
-//  digitalWrite(ledPin, LOW);
+  digitalWrite(ledPin, LOW);
   sensorStateChangeFlag = false;
 }

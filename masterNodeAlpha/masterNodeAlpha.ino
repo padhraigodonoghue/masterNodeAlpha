@@ -20,7 +20,7 @@ int superFrameArray[(framesPerAct * actsPerComposition) + 1];
 
 const boolean debugMode          = true;   // toggle serial port debug messages
 const boolean sensorMode         = true;   // toggle sensor functionality
-const boolean dataTicking        = true;   // toggle solenoid tick sound on each traffic detection
+const boolean dataTicking        = false;   // toggle solenoid tick sound on each traffic detection
 
 /** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
 /** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ sensor code variables @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
