@@ -14,4 +14,9 @@ void incrementTrafficCount()
     Serial.println(superFrameArray[dynamicIndex]);
     Serial.println("");
   }
+  
+  if (dataTicking == true)
+  {
+    solenoider("damp");
+  }
 }

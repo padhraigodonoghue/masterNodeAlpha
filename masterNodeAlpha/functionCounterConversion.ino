@@ -25,7 +25,7 @@ int countConversion(int index)
     // some debugging checks
     if (debugMode == true)
     {
-      Serial.print(" ### floatyBinCount: ");
+      Serial.print("[count-to-rule conversion....] floatyBinCount: ");
       Serial.print(floatyBinCount);
       Serial.print(" ### floatyMaxFrameTraffic: ");
       Serial.print(floatyMaxFrameTraffic);

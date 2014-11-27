@@ -14,7 +14,7 @@ void concentrateOnMusic()
       // some debugging checks
       if (debugMode == true)
       {
-        Serial.print("lookAheadMillis: ");
+        Serial.print("[composition playback info...] lookAheadMillis: ");
         Serial.print(lookAheadMillis);
       }
 
@@ -25,8 +25,8 @@ void concentrateOnMusic()
       // some debugging checks
       if (debugMode == true)
       {
-        Serial.print("superArrayAddress: ");
-        Serial.print(superArrayAddress);
+        Serial.print(" ### superArrayAddress: ");
+        Serial.println(superArrayAddress);
       }
 
       // derive ruleNumber by comparing to a reference maximum
@@ -42,11 +42,10 @@ void concentrateOnMusic()
 
       // determine necessary wait time before rule should be sent
       // add buffer time to current system time, modulo compare with ruleDuration, subtract result from buffer time
-      int waitTime   = playbackBuffer - ((millis() + playbackBuffer) % ruleDuration);
+      int waitTime = playbackBuffer - ((millis() + playbackBuffer) % ruleDuration);
 
       // call the function that executes a delay before sending rule number over Serial Port
       playNote(waitTime, ruleNumber);
     }
   }
 }
-

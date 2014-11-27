@@ -1,11 +1,11 @@
-const long frameDuration         = 20000; // in milliseconds, i.e. 7 minutes; duration of real-time "frame"
-const int framesPerAct           = 9;      // number of "frames" in each "act" of composition ("act" is 1/3 of composition)
+const long frameDuration         = 420000; // in milliseconds, i.e. 7 minutes; duration of real-time "frame"
+const int framesPerAct           = 3;      // number of "frames" in each "act" of composition ("act" is 1/3 of composition)
 const int actsPerComposition     = 3;      // number of "acts" in the composition
 const int ruleDuration           = 5000;   // in milliseconds
 const int playbackBuffer         = 100;    // in milliseconds; the lead time before a note is due to be played which, when entered, Arduino focuses only on preparing to play that note (i.e. ignores Serial Port buffer)
 const int numberOfRules          = 50;
 
-int maxFrameTraffic              = 100;    // rough estimate; will be dynamically adjusted when current max is exceeded
+int maxFrameTraffic              = 50;    // rough estimate; will be dynamically adjusted when current max is exceeded
 
 int lastAccessedFrame;      // used in determination of "frame" change
 
@@ -18,40 +18,39 @@ int superArrayLength;                      // for storing length of array withou
 // array of counts, 3-acts-and-1-frame in length
 int superFrameArray[(framesPerAct * actsPerComposition) + 1];
 
-const boolean debugMode          = false;  // toggle serial port debug messages
-const boolean sensorMode         = false; // toggle sensor functionality
+const boolean debugMode          = true;   // toggle serial port debug messages
+const boolean sensorMode         = true;   // toggle sensor functionality
+const boolean dataTicking        = true;   // toggle solenoid tick sound on each traffic detection
 
 /** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
 /** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ sensor code variables @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
 /** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
 
-const int sensorPin              = A0;    // main sensor pin input
-const int ledPin                 = 13;    // assign output pin for visual feedback
+const int sensorPin              = A0;     // main sensor pin input
+const int ledPin                 = 13;     // assign output pin for visual feedback
 
-boolean ledState = false;
+boolean ledState                 = false;
 unsigned long previousBlinkTime  = 0;
 
-int sensorValue;                          // store last sensor reading
+int sensorValue;                           // store last sensor reading
 
-boolean sensorStateChangeFlag    = false; // to allow us to check previous state and run certain state-dependent functions
-boolean calibrateMode            = false;
+boolean sensorStateChangeFlag    = false;  // to allow us to check previous state and run certain state-dependent functions
+boolean calibrateMode            = true;
+boolean sensorReadDebugMode      = false;
 
-float maxVal;                             // to hold max value from calibration
-float minVal                     = 300;   // to hold min value from calibration
-float mnVM                       = 1.2;   // MinValMultiple to create threshold that correctly detects when the beam is intact
-float mxVM                       = 0.25;  // MaxValMultiple to create threshold that correctly detects when the beam is broken
+int sensorBaseLevel              = 300;    // to hold min value from calibration
 
-int indexForAverager             = 0;     // tracker for index of recent sensor values array
-const int numOfReadsForAverager  = 10;    // length of array (i.e. sample size of averaging analysis)
-int arrayOfVals[numOfReadsForAverager];   // array of sensor reads to be averaged
+int indexForAverager             = 0;      // tracker for index of recent sensor values array
+const int numOfReadsForAverager  = 8;      // length of array (i.e. sample size of averaging analysis)
+int arrayOfVals[numOfReadsForAverager];    // array of sensor reads to be averaged
 
 /** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
 /** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ program start @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
 /** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
 
 void setup()
-{
-  compositionDuration            = (long) (framesPerAct * actsPerComposition * ruleDuration);
+{  
+  compositionDuration            = ((long) framesPerAct * (long) actsPerComposition * (long) ruleDuration);
   actRealtimeDataDuration        = frameDuration * (long) framesPerAct;
   framesPerComposition           = framesPerAct * actsPerComposition;
   superArrayLength               = (framesPerAct * actsPerComposition) + 1;
@@ -61,7 +60,7 @@ void setup()
   // initialise superFrameArray (i.e. the traffic count bank) with -1 to indicate lack of sensor data
   for (int i = 0; i < superArrayLength; i++)
   {
-    superFrameArray[i] = 50;
+    superFrameArray[i] = -1;
   }
 
   /*
@@ -111,6 +110,9 @@ void setup()
 void loop()
 {
   concentrateOnMusic();
+  
+  // depending on whether or not sensor monitoring is done on-board or externally...
+  // poll either sensor or Serial Port for data
   if (sensorMode == true)
   {
     pollSensor();
@@ -119,8 +121,6 @@ void loop()
   {
     serviceSerial();
   }
+  
+  frameTracker();
 }
-
-
-
-

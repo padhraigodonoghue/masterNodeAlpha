@@ -1,4 +1,4 @@
-// calibrate the sensors max and min values which are used to set the threshold that breakc the beam
+// calibrate the sensors sensor base level used as basis for break threshold of beam
 void sensorCalibration()
 {
   if (debugMode == true)
@@ -6,34 +6,27 @@ void sensorCalibration()
     Serial.print("calibrating sensor");
   }
 
-  for (long i= 0; i < 30000; i++) 
+  for (long i= 0; i < 20000; i++) 
   {
-    if (debugMode == true && (i % 10000) == (10000 - 1))
+    if (debugMode == true && (i % 5000) == (0) && i != 0)
     {
       Serial.print(".");
     }
-    
-    sensorValue = analogRead(sensorPin);
-    int incoming = sensorAveraging(sensorValue);
 
-    if(incoming > maxVal)
-    {
-      maxVal = incoming;
-    }
-    else if(incoming < minVal)
-    {
-      minVal = incoming;
-    }
-    nonBlockingBlink(); 
+    sensorValue = analogRead(sensorPin);
+    
+    sensorBaseLevel = sensorAveraging(sensorValue);
+    
+    nonBlockingBlink();
   }
   
+  digitalWrite(ledPin, false);
+
   if (debugMode == true)
   {
     Serial.println(" CALIBRATION COMPLETE!");
-    Serial.print("maxVal: ");
-    Serial.print(maxVal);
-    Serial.print(" ### minVal: ");
-    Serial.println(minVal);
+    Serial.print("sensorBaseLevel: ");
+    Serial.println(sensorBaseLevel);
     Serial.println("");
   }
 }
@@ -44,7 +37,7 @@ void nonBlockingBlink()
   int blinkDuration = 100;
 
   long currentTime = millis();
-  
+
   if (currentTime - previousBlinkTime >= blinkDuration)
   {
     previousBlinkTime = currentTime;

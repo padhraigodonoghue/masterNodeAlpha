@@ -17,7 +17,7 @@ int sensorAveraging(int sensorVal)
   // sum all values stored in array (i.e. last 10 sensor readings)
   for (int i = 0; i < numOfReadsForAverager; i++)
   {
-    sum = sum + arrayOfVals[indexForAverager];
+    sum = sum + arrayOfVals[i];
   }
   
   // calculate mean

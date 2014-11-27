@@ -6,7 +6,7 @@ void playNote(int waitTimeIn, int ruleNumberIn)
   {
     waitTimeIn = 0;
   }
-  
+
   delay(waitTimeIn);
 
   // some debugging checks
@@ -16,6 +16,20 @@ void playNote(int waitTimeIn, int ruleNumberIn)
     Serial.print(waitTimeIn);
     Serial.print(" ### SENDING RULE: ");
     Serial.println(ruleNumberIn);
+
+    if (ruleNumberIn != 255)
+    {
+      for (int i = 0; i < ruleNumberIn; i++)
+      {
+        Serial.print("|");
+      }
+    }
+    else
+    {
+        Serial.print(":P");
+    }
+
+    Serial.println("");
     Serial.println("");
   }
   else
@@ -23,4 +37,3 @@ void playNote(int waitTimeIn, int ruleNumberIn)
     Serial.write(ruleNumberIn);
   }
 }
-
