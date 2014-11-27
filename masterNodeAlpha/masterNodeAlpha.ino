@@ -60,7 +60,7 @@ int arrayOfVals[numOfReadsForAverager];     // array of sensor reads to be avera
 unsigned long calibrationStartTime;
 unsigned long bounceFromTime;
 unsigned long debouncingSince;
-const int debounceDuration        = 50;     // in milliseconds; duration for which debouncing lasts
+const int debounceDuration        = 75;    // in milliseconds; duration for which debouncing lasts
 
 /** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
 /** @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ program start @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ **/
@@ -97,6 +97,8 @@ void setup()
 
   // for sensor feedback
   pinMode(ledPin, OUTPUT);
+  digitalWrite(solenoidPin, LOW);
+  
 
   if (calibrateMode == true)
   {

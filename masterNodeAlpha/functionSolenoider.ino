@@ -17,6 +17,7 @@ void nonBlockingSolenoidRelease()
 
   if (currentTime - struckAtTime >= solenoidHoldDuration)
   {
+    Serial.println("solenoid should release!");
     digitalWrite(solenoidPin, LOW);
     solenoidPressure = false;
   }
