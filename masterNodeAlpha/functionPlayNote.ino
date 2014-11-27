@@ -36,4 +36,9 @@ void playNote(int waitTimeIn, int ruleNumberIn)
   {
     Serial.write(ruleNumberIn);
   }
+  
+  if (ruleNumberIn != 0)
+  {
+    solenoider(hardVelocity, true);
+  }
 }

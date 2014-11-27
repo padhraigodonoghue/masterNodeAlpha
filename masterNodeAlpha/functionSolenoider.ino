@@ -1,12 +1,45 @@
-void solenoider(String command)
+// for activating solenoid (and updating flag that indicates whether it should be released after hold time)
+void solenoider(int velocityIn, boolean pressurised)
 {
-  if (command.equals("damp") == true)
+  digitalWrite(solenoidPin, velocityIn);
+
+  if (pressurised == true)
   {
-    Serial.println("damp sound");
-    digitalWrite(10, HIGH);
-    digitalWrite(ledPin, HIGH);
-    delay(100);
-    digitalWrite(10, LOW);
-    digitalWrite(ledPin, LOW);
+    struckAtTime = millis();
+    solenoidPressure = true;
   }
 }
+
+// non-blocking solenoid hold and release
+void nonBlockingSolenoidRelease()
+{
+  unsigned long currentTime = millis();
+
+  if (currentTime - struckAtTime >= solenoidHoldDuration)
+  {
+    digitalWrite(solenoidPin, LOW);
+    solenoidPressure = false;
+  }
+}
+
+// non-blocking pre-release and activation
+void nonBlockingSolenoidTick()
+{
+  unsigned long currentTime = millis();
+  
+  // some debugging checks
+  if (solenoidDebugMode == true)
+  {
+    Serial.print("time to tick: ");
+    Serial.print(solenoidPreHoldDuration - (currentTime - coiledAtTime));
+    Serial.print(" ms");
+  }
+
+  if (currentTime - coiledAtTime >= solenoidPreHoldDuration)
+  {
+    solenoider(tickVelocity, false);
+    solenoidCoil = false;
+  }
+}
+
+

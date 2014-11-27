@@ -5,22 +5,34 @@ void pollSensor()
   // smooth reading
   int smoothRead = sensorAveraging(sensorValue);
 
-  // check if beam has been broken or check if it has been restored
-  if (smoothRead >= (sensorBaseLevel * 1.2) && sensorStateChangeFlag == false)
+  if ((millis() - debouncingSince) > (long) debounceDuration)
   {
-    if (sensorReadDebugMode == true)
-    {
-      Serial.print("sensorValue: ");
-      Serial.println(sensorValue);
-      Serial.print("smoothRead: ");
-      Serial.println(smoothRead);
-    }
-   
-    beamBroken();
+    bounceGuard = false;
   }
-  else if (smoothRead < (sensorBaseLevel * 1.125) && sensorStateChangeFlag == true)
+
+  if (bounceGuard == false)
   {
-    beamBack();
+    // check if beam has been broken or check if it has been restored
+    if (smoothRead >= (sensorBaseLevel * 1.2) && sensorStateChangeFlag == false)
+    {
+      if (sensorReadDebugMode == true)
+      {
+        Serial.print("sensorValue: ");
+        Serial.println(sensorValue);
+        Serial.print("smoothRead: ");
+        Serial.println(smoothRead);
+      }
+
+      beamBroken();
+
+      bounceGuard = true;
+    }
+    else if (smoothRead < (sensorBaseLevel * 1.125) && sensorStateChangeFlag == true)
+    {
+      beamBack();
+      
+      bounceGuard = true;
+    }
   }
 }
 
@@ -38,3 +50,5 @@ void beamBack()
   digitalWrite(ledPin, LOW);
   sensorStateChangeFlag = false;
 }
+
+

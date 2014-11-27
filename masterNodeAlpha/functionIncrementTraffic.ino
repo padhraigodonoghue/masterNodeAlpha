@@ -17,6 +17,7 @@ void incrementTrafficCount()
   
   if (dataTicking == true)
   {
-    solenoider("damp");
+    solenoidCoil = true;
+    coiledAtTime = millis();
   }
 }

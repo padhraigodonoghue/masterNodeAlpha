@@ -1,14 +1,21 @@
 // calibrate the sensors sensor base level used as basis for break threshold of beam
 void sensorCalibration()
 {
+  int calibrationDuration = 3000;
+  
+  calibrating = true;
+  calibrationStartTime = millis();
+  
   if (debugMode == true)
   {
     Serial.print("calibrating sensor");
   }
+  
+  int calibrationElapsed = (int) (millis() - calibrationStartTime);
 
-  for (long i= 0; i < 20000; i++) 
+  while (calibrationElapsed < calibrationDuration)
   {
-    if (debugMode == true && (i % 5000) == (0) && i != 0)
+    if (debugMode == true && (calibrationElapsed % 500) == 0)
     {
       Serial.print(".");
     }
@@ -18,7 +25,11 @@ void sensorCalibration()
     sensorBaseLevel = sensorAveraging(sensorValue);
     
     nonBlockingBlink();
+    
+    calibrationElapsed = (int) (millis() - calibrationStartTime);
   }
+  
+  calibrating = false;
   
   digitalWrite(ledPin, false);
 
