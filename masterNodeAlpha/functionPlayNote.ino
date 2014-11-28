@@ -26,7 +26,7 @@ void playNote(int waitTimeIn, int ruleNumberIn)
     }
     else
     {
-        Serial.print(":P");
+      Serial.print(":P");
     }
 
     Serial.println("");
@@ -36,9 +36,16 @@ void playNote(int waitTimeIn, int ruleNumberIn)
   {
     Serial.write(ruleNumberIn);
   }
-  
+
   if (ruleNumberIn != 0)
   {
     solenoider(hardVelocity, true);
+
+    if (ruleNumberIn != 255)
+    {
+      rulePlayed = true;
+      rulePlayedAt = millis();
+    }
   }
 }
+

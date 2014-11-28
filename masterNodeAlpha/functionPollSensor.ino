@@ -5,7 +5,7 @@ void pollSensor()
   // smooth reading
   int smoothRead = sensorAveraging(sensorValue);
 
-  if ((millis() - debouncingSince) > (long) debounceDuration)
+  if ((millis() - ((unsigned long) debouncingSince)) > ((unsigned long) debounceDuration))
   {
     bounceGuard = false;
   }

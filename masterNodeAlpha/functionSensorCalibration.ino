@@ -11,7 +11,7 @@ void sensorCalibration()
     Serial.print("calibrating sensor");
   }
   
-  int calibrationElapsed = (int) (millis() - calibrationStartTime);
+  int calibrationElapsed = (int) (millis() - ((unsigned long) calibrationStartTime));
 
   while (calibrationElapsed < calibrationDuration)
   {
@@ -26,7 +26,7 @@ void sensorCalibration()
     
     nonBlockingBlink();
     
-    calibrationElapsed = (int) (millis() - calibrationStartTime);
+    calibrationElapsed = (int) (millis() - ((unsigned long) calibrationStartTime));
   }
   
   calibrating = false;
