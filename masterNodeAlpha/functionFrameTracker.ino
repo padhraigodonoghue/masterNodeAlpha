@@ -1,7 +1,7 @@
 int frameTracker()
 {
   // should always round down to current frame
-  int currentFrame = (millis() % ((unsigned long) masterWrapTime)) / ((unsigned long) frameDuration);
+  int currentFrame = (int) ((millis() % ((unsigned long) masterWrapTime)) / ((unsigned long) frameDuration));
   
   //  has the frame changed since last check
   if (currentFrame != lastAccessedFrame)

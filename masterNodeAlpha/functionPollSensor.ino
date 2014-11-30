@@ -5,50 +5,51 @@ void pollSensor()
   // smooth reading
   int smoothRead = sensorAveraging(sensorValue);
 
-  if ((millis() - ((unsigned long) debouncingSince)) > ((unsigned long) debounceDuration))
+  if ((millis() - debouncingSince) > ((unsigned long) debounceDuration))
   {
     bounceGuard = false;
   }
-
+  
+  // before a successive IR sensor break can be detected, the debouncing round-trip of minimum (2 * debounceDuration) must be made
   if (bounceGuard == false)
   {
     // check if beam has been broken or check if it has been restored
-    if (smoothRead >= (sensorBaseLevel * 1.2) && sensorStateChangeFlag == false)
+    if (smoothRead >= (sensorBaseLevel * 1.375) && sensorStateChangeFlag == false)
     {
-      if (sensorReadDebugMode == true)
-      {
-        Serial.print("sensorValue: ");
-        Serial.println(sensorValue);
-        Serial.print("smoothRead: ");
-        Serial.println(smoothRead);
-      }
-
       beamBroken();
-
-      bounceGuard = true;
     }
     else if (smoothRead < (sensorBaseLevel * 1.125) && sensorStateChangeFlag == true)
     {
       beamBack();
-      
-      bounceGuard = true;
+    }
+    
+    // some debugging checks
+    if (sensorReadDebugMode == true)
+    {
+      Serial.print("sensorValue: ");
+      Serial.println(sensorValue);
+      Serial.print("smoothRead: ");
+      Serial.println(smoothRead);
     }
   }
 }
 
-// two simple functions that act accordingly when the IR beam is broken and restored
-
+// do when IR beam is broken
 void beamBroken()
 {
-  digitalWrite(ledPin, HIGH);
   incrementTrafficCount();
+  digitalWrite(ledPin, HIGH);
   sensorStateChangeFlag = true;
+  bounceGuard = true;
+  debouncingSince = millis();
 }
 
+// do when IR beam is restored
 void beamBack()
 {
   digitalWrite(ledPin, LOW);
   sensorStateChangeFlag = false;
+  bounceGuard = true;
+  debouncingSince = millis();
 }
-
 

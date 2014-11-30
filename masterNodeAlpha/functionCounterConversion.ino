@@ -8,7 +8,7 @@ int countConversion(int index)
   if (binCount != -1)
   {
     // high-water-mark approach to calibrating reference maximum
-    if (binCount > maxFrameTraffic && binCount < countLimit)
+    if (binCount > maxFrameTraffic && binCount <= countLimit)
     {
       maxFrameTraffic = binCount;
     }

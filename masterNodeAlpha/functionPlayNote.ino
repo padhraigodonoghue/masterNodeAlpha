@@ -2,13 +2,11 @@
 void playNote(int waitTimeIn, int ruleNumberIn)
 {
   // in case Arduino falls behind unexpectedly, do not allow a negative wait value reach 
-  if (waitTimeIn < 0)
+  if (waitTimeIn > 0)
   {
-    waitTimeIn = 0;
+    delay(waitTimeIn);
   }
-
-  delay(waitTimeIn);
-
+  
   // some debugging checks
   if (debugMode == true)
   {
@@ -16,7 +14,7 @@ void playNote(int waitTimeIn, int ruleNumberIn)
     Serial.print(waitTimeIn);
     Serial.print(" ### SENDING RULE: ");
     Serial.println(ruleNumberIn);
-
+    
     if (ruleNumberIn != 255)
     {
       for (int i = 0; i < ruleNumberIn; i++)
@@ -40,7 +38,8 @@ void playNote(int waitTimeIn, int ruleNumberIn)
   if (ruleNumberIn != 0)
   {
     solenoider(hardVelocity, true);
-
+    
+    // enable self-sounding (except in the case of debug rule 255)
     if (ruleNumberIn != 255)
     {
       rulePlayed = true;
@@ -48,4 +47,5 @@ void playNote(int waitTimeIn, int ruleNumberIn)
     }
   }
 }
+
 

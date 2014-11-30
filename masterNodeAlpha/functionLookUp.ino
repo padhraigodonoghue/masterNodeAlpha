@@ -1,13 +1,14 @@
 // compensates for rolling index of the superFrameArray
 int lookUp(unsigned long timeIn)
 {  
-  // determine which note of the n-note composition is imminent
-  // n = (framesPerAct * actsPerComposition), i.e. 27-note
+  // determine which note of the n-note composition is imminent...
+  // where n = (framesPerAct * actsPerComposition), i.e. 27-note...
+  // and number of first note is 0 and last note, 26
   int noteNumber = (int) ((timeIn % (unsigned long) actRealtimeDataDuration) / (unsigned long) ruleDuration);
   
-  // should round down to whole number of completed "acts" into masterWrapTime
+  // should round down to the (whole) number of completed "acts" into masterWrapTime
   // then multiplied by framesPerAct to give number of first "frame" of "act"
-  int firstFrameOfCurrentAct = (int) (((timeIn % masterWrapTime) / (unsigned long)  actRealtimeDataDuration) * (unsigned long) framesPerAct);
+  int firstFrameOfCurrentAct = (int) (((timeIn % masterWrapTime) / (unsigned long) actRealtimeDataDuration) * (unsigned long) framesPerAct);
 
   // get last frame of last act, not just last frame
   int lastFrameOfPreviousAct = (firstFrameOfCurrentAct + superArrayLength - 1) % superArrayLength;

@@ -24,6 +24,14 @@ void sensorCalibration()
     
     sensorBaseLevel = sensorAveraging(sensorValue);
     
+    /*
+    if (debugMode == true)
+    {
+      Serial.print(" sensorBaseLevel: ");
+      Serial.println(sensorBaseLevel);
+    }
+    */
+    
     nonBlockingBlink();
     
     calibrationElapsed = (int) (millis() - ((unsigned long) calibrationStartTime));

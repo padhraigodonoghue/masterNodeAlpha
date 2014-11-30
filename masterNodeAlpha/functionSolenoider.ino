@@ -17,13 +17,24 @@ void nonBlockingSolenoidRelease()
 
   if (currentTime - struckAtTime >= ((unsigned long) solenoidHoldDuration))
   {
-  // some debugging checks
-  if (solenoidDebugMode == true)
-  {
-    Serial.println("solenoid should release!");
-  }
+    // some debugging checks
+    if (solenoidDebugMode == true)
+    {
+      Serial.println("solenoid should release!");
+      Serial.println("");
+    }
     analogWrite(solenoidPin, LOW);
     solenoidPressure = false;
+  }
+  else
+  {
+    // some debugging checks
+    if (solenoidDebugMode == true)
+    {
+      Serial.print("time before release: ");
+      Serial.print(solenoidHoldDuration - (currentTime - struckAtTime));
+      Serial.println(" ms");
+    }
   }
 }
 
@@ -46,7 +57,7 @@ void nonBlockingSolenoidTick()
     solenoider(tickVelocity, false);
     solenoidCoil = false;
     solenoidDamp = true;
-    
+
     dampedAtTime = millis();
 
     // some debugging checks
@@ -85,6 +96,8 @@ void nonBlockingDamping()
     if (solenoidDebugMode == true)
     {
       Serial.println("solenoid relax");
+      Serial.println("");
     }
   }
 }
+

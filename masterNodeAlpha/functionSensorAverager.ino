@@ -1,5 +1,4 @@
-// smooths the data coming in from the sensor out to achieve more accurate readings
-
+// smooths out the data coming in from the sensor to achieve more accurate readings
 int sensorAveraging(int sensorVal) 
 {
   int sum = 0;
@@ -11,7 +10,7 @@ int sensorAveraging(int sensorVal)
     dynamicNumberOfReads = numOfReadsForAverager / 4;
   }
 
-  if (indexForAverager > dynamicNumberOfReads)
+  if (indexForAverager >= dynamicNumberOfReads)
   {
     indexForAverager = 0;
   }

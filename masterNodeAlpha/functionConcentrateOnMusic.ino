@@ -48,12 +48,17 @@ void concentrateOnMusic()
       // call the function that executes a delay before sending rule number over Serial Port
       playNote(waitTime, ruleNumber);
     }
+    
+    // checks necessary for identifying if it is almost time to play own note
     else if (rulePlayed == true)
     {
       selfSoundLookAhead = millis() + (unsigned long) selfSoundBuffer;
+      
+      // calculates time interval in milliseconds between each self-sounding note
       int selfSoundInterval = (ruleDuration / selfSoundFrequency);
-
-      if (selfSoundLookAhead % ((unsigned long) selfSoundInterval) < ((unsigned long) selfSoundBuffer))
+      
+      // check whether the current time is within the lead-time of the next note?
+      if ((selfSoundLookAhead % ((unsigned long) selfSoundInterval)) < ((unsigned long) selfSoundBuffer))
       {
         int selfSoundWaitTime = (int) (((unsigned long) selfSoundBuffer) - ((millis() + ((unsigned long) selfSoundBuffer)) % ((unsigned long) selfSoundInterval)));
         delay(selfSoundWaitTime);
@@ -66,15 +71,12 @@ void concentrateOnMusic()
         }
       }
       // have all beats been played
-      else if (((selfSoundLookAhead % ruleDuration) / selfSoundFrequency) == selfSoundFrequency - 1)
+      else if (((selfSoundLookAhead % ((unsigned long) ruleDuration)) / ((unsigned long) selfSoundFrequency)) == ((unsigned long) selfSoundFrequency - 1))
       {
         rulePlayed == false;
       }
     }
   }
 }
-
-
-
 
 
