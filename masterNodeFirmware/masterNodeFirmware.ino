@@ -79,7 +79,7 @@ const float restoreThresholdMultiplier = 1.125;
 void setup()
 {
   // delay to allow all slaves to reach state of readiness
-//  delay(60000);
+  delay(60000);
   
   compositionDuration             = ((long) framesPerAct * (long) actsPerComposition * (long) ruleDuration);
   actRealtimeDataDuration         = frameDuration * (long) framesPerAct;
