@@ -76,6 +76,8 @@ const int debounceDuration        = 60;     // in milliseconds; duration for whi
 
 void setup()
 {
+  // delay to allow all slaves to reach state of readiness
+  delay(60000);
   
   compositionDuration             = ((long) framesPerAct * (long) actsPerComposition * (long) ruleDuration);
   actRealtimeDataDuration         = frameDuration * (long) framesPerAct;

@@ -1,8 +1,10 @@
 // get into the groove, etc.
 void concentrateOnMusic()
 {
-  // millis() value must be cast to signed long in order to do maths
+  // playbackBuffer value must be cast to unsigned long in order to do maths with millis() value
   unsigned long lookAheadMillis = millis() + (unsigned long) playbackBuffer;
+  
+  // used in preparation for triggering board's own sound-making mechanism (on solenoidPin)
   unsigned long selfSoundLookAhead;
 
   // is the current time within the playback zone?

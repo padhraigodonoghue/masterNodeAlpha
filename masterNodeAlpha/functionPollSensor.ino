@@ -9,7 +9,7 @@ void pollSensor()
   {
     bounceGuard = false;
   }
-  
+
   // before a successive IR sensor break can be detected, the debouncing round-trip of minimum (2 * debounceDuration) must be made
   if (bounceGuard == false)
   {
@@ -22,7 +22,18 @@ void pollSensor()
     {
       beamBack();
     }
-    
+    // simulate sensor break using Serial Monitor input (only in debug mode)
+    else if (debugMode == true && sensorStateChangeFlag == false)
+    {
+      while(Serial.available())
+      {
+        if(Serial.read() == 49)
+        {
+          beamBroken();
+        }
+      }
+    }
+
     // some debugging checks
     if (sensorReadDebugMode == true)
     {
@@ -52,4 +63,6 @@ void beamBack()
   bounceGuard = true;
   debouncingSince = millis();
 }
+
+
 

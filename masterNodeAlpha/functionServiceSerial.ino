@@ -23,7 +23,7 @@ void serviceSerial()
       {
         // increment count on whatever frame for every byte in the serial port buffer
         incrementTrafficCount();
-        Serial.println("got bang");
+        Serial.println("received bang!");
       }
     }
   }

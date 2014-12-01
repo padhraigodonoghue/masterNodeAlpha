@@ -11,6 +11,14 @@ int frameTracker()
     
     // update lastAccessedFrame variable
     lastAccessedFrame = currentFrame;
+    
+    // some debugging checks
+    if (debugMode == true)
+    {
+      Serial.print("FRAME CHANGE! ... currentFrame: ");
+      Serial.println(currentFrame);
+      Serial.println("");
+    }
   }
   
   return currentFrame;

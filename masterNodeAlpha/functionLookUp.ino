@@ -26,7 +26,8 @@ int lookUp(unsigned long timeIn)
     Serial.print((frameTracker() + superArrayLength - 1) % superArrayLength);
     Serial.println(") ");
   }
-
+  
+  // 
   int moduloDividend = lastFrameOfPreviousAct + 2 + noteNumber;
   int moduloDivisor  = superArrayLength;
 
