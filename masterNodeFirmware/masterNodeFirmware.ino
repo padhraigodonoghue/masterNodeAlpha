@@ -78,9 +78,12 @@ const float restoreThresholdMultiplier = 1.125;
 
 void setup()
 {
-  // delay to allow all slaves to reach state of readiness
-  delay(60000);
-  
+  // delay to allow all slaves to reach state of readiness (expect in debug mode)
+  if (debugMode == false)
+  {
+    delay(60000);
+  }
+
   compositionDuration             = ((long) framesPerAct * (long) actsPerComposition * (long) ruleDuration);
   actRealtimeDataDuration         = frameDuration * (long) framesPerAct;
   framesPerComposition            = framesPerAct * actsPerComposition;
@@ -153,10 +156,10 @@ void loop()
   {
     serviceSerial();
   }
-  
+
   // detects when a new "frame" has been entered
   frameTracker();
-  
+
   // if true, solenoid is engaged and may require releasing
   if (solenoidPressure == true)
   {
@@ -165,7 +168,7 @@ void loop()
     {
       Serial.print("pressure's on...");
     }
-    
+
     nonBlockingSolenoidRelease();
   }
   if (solenoidCoil == true)
@@ -175,7 +178,7 @@ void loop()
     {
       Serial.println("coiling...");
     }
-    
+
     nonBlockingSolenoidTick();
   }
   else if (solenoidDamp == true)
@@ -183,3 +186,4 @@ void loop()
     nonBlockingDamping();
   }
 }
+
