@@ -73,9 +73,3 @@ void beamBack()
   bounceGuard = true;
   debouncingSince = millis();
 }
-
-
-
-
-
-

@@ -19,7 +19,7 @@ int superArrayLength;                            // for storing length of array 
 // array of counts, 3-acts-and-1-frame in length
 int superFrameArray[(framesPerAct * actsPerComposition) + 1];
 
-const boolean debugMode                = false;  // toggle serial port debug messages
+const boolean debugMode                = true;  // toggle serial port debug messages
 const boolean solenoidDebugMode        = false;  //
 const boolean sensorMode               = true;   // toggle sensor functionality
 const boolean dataTicking              = true;   // toggle solenoid "tick" sound on each sensor detection

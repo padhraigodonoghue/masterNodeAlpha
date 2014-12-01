@@ -44,5 +44,3 @@ int sensorAveraging(int sensorVal)
 
   return mean;
 }
-
-
