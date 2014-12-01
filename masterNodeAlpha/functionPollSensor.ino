@@ -14,22 +14,32 @@ void pollSensor()
   if (bounceGuard == false)
   {
     // check if beam has been broken or check if it has been restored
-    if (smoothRead >= (sensorBaseLevel * 1.375) && sensorStateChangeFlag == false)
+    if (((float) smoothRead) >= (((float) sensorBaseLevel) * breakThresholdMultiplier) && sensorStateChangeFlag == false)
     {
       beamBroken();
     }
-    else if (smoothRead < (sensorBaseLevel * 1.125) && sensorStateChangeFlag == true)
+    else if (((float) smoothRead) < (((float) sensorBaseLevel) * restoreThresholdMultiplier) && sensorStateChangeFlag == true)
     {
       beamBack();
     }
+
     // simulate sensor break using Serial Monitor input (only in debug mode)
-    else if (debugMode == true && sensorStateChangeFlag == false)
+    if (debugMode == true)
     {
-      while(Serial.available())
+      // this behaviour is blocking, but occurs only in debug mode
+      while (Serial.available())
       {
-        if(Serial.read() == 49)
+        if ((millis() - debouncingSince) > ((unsigned long) debounceDuration))
         {
-          beamBroken();
+          bounceGuard = false;
+        }
+
+        if (bounceGuard == false)
+        {
+          if (Serial.read() == 49)
+          {
+            beamBroken();
+          }
         }
       }
     }
@@ -63,6 +73,9 @@ void beamBack()
   bounceGuard = true;
   debouncingSince = millis();
 }
+
+
+
 
 
 
