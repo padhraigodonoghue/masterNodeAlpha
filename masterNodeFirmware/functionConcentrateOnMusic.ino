@@ -75,9 +75,14 @@ void concentrateOnMusic()
       // have all beats been played
       else if (((selfSoundLookAhead % ((unsigned long) ruleDuration)) / ((unsigned long) selfSoundFrequency)) == ((unsigned long) selfSoundFrequency - 1))
       {
-        Serial.println("");
+        // some debugging checks
+        if (debugMode == true)
+        {
+          Serial.println("");
+        }
         rulePlayed == false;
       }
     }
   }
 }
+
