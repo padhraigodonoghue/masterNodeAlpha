@@ -50,7 +50,7 @@ void playNote(int waitTimeIn, int ruleNumberIn)
     // rule number 0 (i.e. don't send anything to slave nodes) is to be played
     solenoidCoil = true;
     coiledAtTime = millis();
-//    rulePlayed = false;
+    rulePlayed   = false;
   }
 }
 

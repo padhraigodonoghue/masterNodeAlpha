@@ -72,17 +72,16 @@ void concentrateOnMusic()
           Serial.println("self-sounding!");
         }
       }
-      // have all beats been played
+      // have all beats been played [apparently condition is never reached ... (forced rulePlayed to 'false' for rule 0 in playNote function as patch)]
       else if (((selfSoundLookAhead % ((unsigned long) ruleDuration)) / ((unsigned long) selfSoundFrequency)) == ((unsigned long) selfSoundFrequency - 1))
       {
         // some debugging checks
         if (debugMode == true)
         {
-          Serial.println("in here");
+          Serial.println("");
         }
         rulePlayed = false;
       }
     }
   }
 }
-

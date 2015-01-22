@@ -1,11 +1,8 @@
-#include <Time.h>
-
-const boolean timeOffsetMode           = true;   // toggle DS1307RTC-based time offset (used for synchronising master node with real-world time)
 unsigned long timeReferenceOffset      = 0;      // in milliseconds; the offset needed to (roughly) shift the millis() clock into minute-alignment with the RTC clock
 
-const long frameDuration               = 30000; // in milliseconds, i.e. 7 minutes; duration of real-time "frame"
-const int framesPerAct                 = 6;      // number of "frames" in each "act" of composition ("act" is 1/3 of composition)
-const int actsPerComposition           = 3;      // number of "acts" in the composition
+const long frameDuration               = 600000; // in milliseconds, i.e. 7 minutes; duration of real-time "frame"
+const int framesPerAct                 = 12;     // number of "frames" in each "act" of composition ("act" is 1/3 of composition)
+const int actsPerComposition           = 1;      // number of "acts" in the composition
 const int ruleDuration                 = 5000;   // in milliseconds
 const int playbackBuffer               = 80;     // in milliseconds; the lead-time before a note is due to be played; which, when entered, allows program to stall everything else and focus only on playing that note (i.e. ignore Serial Port buffer)
 const int numberOfRules                = 50;
@@ -124,11 +121,6 @@ void setup()
   {
     sensorCalibration();
   }
-  
-  if (timeOffsetMode == true)
-  {
-    setTimeOffset();
-  }
 
   // some debugging checks
   if (debugMode == true)
@@ -201,4 +193,3 @@ void loop()
     nonBlockingDamping();
   }
 }
-
