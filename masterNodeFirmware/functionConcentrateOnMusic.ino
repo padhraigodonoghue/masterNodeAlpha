@@ -1,8 +1,8 @@
 // get into the groove, etc.
 void concentrateOnMusic()
 {
-  // playbackBuffer value must be cast to unsigned long in order to do maths with millis() value
-  unsigned long lookAheadMillis = millis() + (unsigned long) playbackBuffer;
+  // playbackBuffer value must be cast to unsigned long in order to do maths with millisOffset() value
+  unsigned long lookAheadMillis = millisOffset() + (unsigned long) playbackBuffer;
 
   // used in preparation for triggering board's own sound-making mechanism (on solenoidPin)
   unsigned long selfSoundLookAhead;
@@ -38,14 +38,14 @@ void concentrateOnMusic()
       // some debugging checks
       if (debugMode == true)
       {
-        unsigned long checkTime = millis();
-        Serial.print("new millis(): ");
+        unsigned long checkTime = millisOffset();
+        Serial.print("new millisOffset(): ");
         Serial.println(checkTime);
       }
 
       // determine necessary wait time before rule should be sent
       // add buffer time to current system time, modulo compare with ruleDuration, subtract result from buffer time
-      int waitTime = (int) (((unsigned long) playbackBuffer) - ((millis() + ((unsigned long) playbackBuffer)) % ((unsigned long) ruleDuration)));
+      int waitTime = (int) (((unsigned long) playbackBuffer) - ((millisOffset() + ((unsigned long) playbackBuffer)) % ((unsigned long) ruleDuration)));
 
       // call the function that executes a delay before sending rule number over Serial Port
       playNote(waitTime, ruleNumber);
@@ -54,7 +54,7 @@ void concentrateOnMusic()
     // checks necessary for identifying if it is almost time to play own note
     else if (rulePlayed == true)
     {
-      selfSoundLookAhead = millis() + (unsigned long) selfSoundBuffer;
+      selfSoundLookAhead = millisOffset() + (unsigned long) selfSoundBuffer;
 
       // calculates time interval in milliseconds between each self-sounding note
       int selfSoundInterval = (ruleDuration / selfSoundFrequency);
@@ -62,7 +62,7 @@ void concentrateOnMusic()
       // check whether the current time is within the lead-time of the next note?
       if ((selfSoundLookAhead % ((unsigned long) selfSoundInterval)) < ((unsigned long) selfSoundBuffer))
       {
-        int selfSoundWaitTime = (int) (((unsigned long) selfSoundBuffer) - ((millis() + ((unsigned long) selfSoundBuffer)) % ((unsigned long) selfSoundInterval)));
+        int selfSoundWaitTime = (int) (((unsigned long) selfSoundBuffer) - ((millisOffset() + ((unsigned long) selfSoundBuffer)) % ((unsigned long) selfSoundInterval)));
         delay(selfSoundWaitTime);
         solenoider(hardVelocity, true);
 
@@ -78,9 +78,9 @@ void concentrateOnMusic()
         // some debugging checks
         if (debugMode == true)
         {
-          Serial.println("");
+          Serial.println("in here");
         }
-        rulePlayed == false;
+        rulePlayed = false;
       }
     }
   }

@@ -6,7 +6,7 @@ void playNote(int waitTimeIn, int ruleNumberIn)
   {
     delay(waitTimeIn);
   }
-  
+
   // some debugging checks
   if (debugMode == true)
   {
@@ -14,7 +14,7 @@ void playNote(int waitTimeIn, int ruleNumberIn)
     Serial.print(waitTimeIn);
     Serial.print(" ### SENDING RULE: ");
     Serial.println(ruleNumberIn);
-    
+
     if (ruleNumberIn != 255)
     {
       for (int i = 0; i < ruleNumberIn; i++)
@@ -28,7 +28,6 @@ void playNote(int waitTimeIn, int ruleNumberIn)
     }
 
     Serial.println("");
-    Serial.println("");
   }
   else
   {
@@ -38,12 +37,20 @@ void playNote(int waitTimeIn, int ruleNumberIn)
   if (ruleNumberIn != 0)
   {
     solenoider(hardVelocity, true);
-    
-    // enable self-sounding (except in the case of debug rule 255)
+
+    // enable self-sounding on first beat of each bar of n-bar rule (where n is determined by selfSoundFrequency; not enabled in the case of debug rule 255)
     if (ruleNumberIn != 255)
     {
       rulePlayed = true;
-      rulePlayedAt = millis();
+      rulePlayedAt = millisOffset();
     }
   }
+  else
+  {
+    // rule number 0 (i.e. don't send anything to slave nodes) is to be played
+    solenoidCoil = true;
+    coiledAtTime = millis();
+//    rulePlayed = false;
+  }
 }
+

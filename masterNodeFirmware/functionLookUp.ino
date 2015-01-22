@@ -6,12 +6,21 @@ int lookUp(unsigned long timeIn)
   // and number of first note is 0 and last note, 26
   int noteNumber = (int) ((timeIn % (unsigned long) actRealtimeDataDuration) / (unsigned long) ruleDuration);
   
-  // should round down to the (whole) number of completed "acts" into masterWrapTime
-  // then multiplied by framesPerAct to give number of first "frame" of "act"
-  int firstFrameOfCurrentAct = (int) (((timeIn % masterWrapTime) / (unsigned long) actRealtimeDataDuration) * (unsigned long) framesPerAct);
-
-  // get last frame of last act, not just last frame
-  int lastFrameOfPreviousAct = (firstFrameOfCurrentAct + superArrayLength - 1) % superArrayLength;
+  // step 1: calculate array index of currently active frame
+  // step 2:
+  int currentFrameIndex      = (int) ((timeIn % ((unsigned long) masterWrapTime)) / ((unsigned long) frameDuration));
+  int actRelativeFrameNumber = (int) ((timeIn % ((unsigned long) actRealtimeDataDuration)) / ((unsigned long) frameDuration));
+  
+  // some debugging checks
+  if (debugMode == true)
+  {
+    Serial.print(" ### currentFrameIndex: ");
+    Serial.print(currentFrameIndex);
+    Serial.print(" ... actRelativeFrameNumber: ");
+    Serial.print(actRelativeFrameNumber);
+  }
+  
+  int firstFrameOfCurrentAct = ((currentFrameIndex - actRelativeFrameNumber) + superArrayLength) % superArrayLength;
 
   // some debugging checks
   if (debugMode == true)
@@ -20,15 +29,13 @@ int lookUp(unsigned long timeIn)
     Serial.print(noteNumber);
     Serial.print(" (firstFrameOfCurrentAct: ");
     Serial.print(firstFrameOfCurrentAct);
-    Serial.print(", lastFrameOfPreviousAct: ");
-    Serial.print(lastFrameOfPreviousAct);
     Serial.print(", previous frame: ");
-    Serial.print((frameTracker() + superArrayLength - 1) % superArrayLength);
+    Serial.print((currentFrameIndex + superArrayLength - 1) % superArrayLength);
     Serial.println(") ");
   }
   
   // 
-  int moduloDividend = lastFrameOfPreviousAct + 2 + noteNumber;
+  int moduloDividend = firstFrameOfCurrentAct + 1 + noteNumber;
   int moduloDivisor  = superArrayLength;
 
   int indexOut =  moduloDividend % moduloDivisor;

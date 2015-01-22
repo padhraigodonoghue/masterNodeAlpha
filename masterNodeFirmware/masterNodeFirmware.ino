@@ -1,5 +1,10 @@
-const long frameDuration               = 420000; // in milliseconds, i.e. 7 minutes; duration of real-time "frame"
-const int framesPerAct                 = 9;      // number of "frames" in each "act" of composition ("act" is 1/3 of composition)
+#include <Time.h>
+
+const boolean timeOffsetMode           = true;   // toggle DS1307RTC-based time offset (used for synchronising master node with real-world time)
+unsigned long timeReferenceOffset      = 0;      // in milliseconds; the offset needed to (roughly) shift the millis() clock into minute-alignment with the RTC clock
+
+const long frameDuration               = 30000; // in milliseconds, i.e. 7 minutes; duration of real-time "frame"
+const int framesPerAct                 = 6;      // number of "frames" in each "act" of composition ("act" is 1/3 of composition)
 const int actsPerComposition           = 3;      // number of "acts" in the composition
 const int ruleDuration                 = 5000;   // in milliseconds
 const int playbackBuffer               = 80;     // in milliseconds; the lead-time before a note is due to be played; which, when entered, allows program to stall everything else and focus only on playing that note (i.e. ignore Serial Port buffer)
@@ -19,9 +24,9 @@ int superArrayLength;                            // for storing length of array 
 // array of counts, 3-acts-and-1-frame in length
 int superFrameArray[(framesPerAct * actsPerComposition) + 1];
 
-const boolean debugMode                = false;  // toggle serial port debug messages
+const boolean debugMode                = true;  // toggle serial port debug messages
 const boolean solenoidDebugMode        = false;  //
-const boolean sensorMode               = true;   // toggle sensor functionality
+const boolean sensorMode               = false;   // toggle sensor functionality
 const boolean dataTicking              = true;   // toggle solenoid "tick" sound on each sensor detection
 
 boolean solenoidPressure               = false;  // state of solenoid; if true, solenoid is engaged and may require releasing
@@ -78,7 +83,7 @@ const float restoreThresholdMultiplier = 1.125;
 
 void setup()
 {
-  // delay to allow all slaves to reach state of readiness (expect in debug mode)
+  // delay to allow all slaves to reach state of readiness (except in debug mode)
   if (debugMode == false)
   {
     delay(60000);
@@ -91,10 +96,10 @@ void setup()
   masterWrapTime                  = (long) superArrayLength * (long) frameDuration;
   lastAccessedFrame               = superArrayLength - 1; // initialise at end of array; monitoring/playing starts at 0
 
-  // initialise superFrameArray (i.e. the traffic count bank) with -1 to indicate lack of sensor data
+  // initialise superFrameArray (i.e. the traffic count bank) with rule 0
   for (int i = 0; i < superArrayLength; i++)
   {
-    superFrameArray[i] = -1;
+    superFrameArray[i] = 0;
   }
 
   /*
@@ -119,6 +124,11 @@ void setup()
   {
     sensorCalibration();
   }
+  
+  if (timeOffsetMode == true)
+  {
+    setTimeOffset();
+  }
 
   // some debugging checks
   if (debugMode == true)
@@ -139,6 +149,11 @@ void setup()
     Serial.print(millis());
     Serial.println(" ms");
     Serial.println("");
+  }
+  else
+  {
+    // play "Debug Rule"
+    Serial.write(255);
   }
 }
 
